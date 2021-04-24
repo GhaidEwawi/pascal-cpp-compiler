@@ -6,7 +6,7 @@ Header  ->  **program** **id(input,output);**
 Declarations    ->  **VAR** VariableDeclarations 
                     | **<epsilon>**
 
-VariableDeclarations    ->  VariableDeclarations VariableDeclaratio
+VariableDeclarations    ->  VariableDeclarations VariableDeclaration
                             | VariableDeclaration
 
 VariableDeclaration ->  IdentifierList **:** Type **;**
