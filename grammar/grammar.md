@@ -1,7 +1,7 @@
 
 Program ->  Header Declarations Block
 
-Header  ->  **program** **id(input,output);**
+Header  ->  **program** **id(input,output);**  { print("#include <iostream>\nusing namespace std;") }
 
 Declarations    ->  **VAR** VariableDeclarations 
                     | **<epsilon>**

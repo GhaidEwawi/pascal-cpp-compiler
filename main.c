@@ -13,12 +13,13 @@
 #define DONE 260
 #define BEGIN 261
 #define END 262
-#define EXP 263
-#define INX 264
-#define POX 265
+#define PRG 263
+#define INP 264
+#define OUT 265
 #define TIM 266
 #define MIN 267
 #define PLS 268
+#define EXP 269
 #define STRMAX 999
 #define SYMMAX 100
 
@@ -99,8 +100,8 @@ int lexan()     /* lexical analyzer */
 void parse()
 {
     lookahead = lexan();
-    match(EXP); match('('); match(INX); match(','); match(POX); match(')');
-    fprintf(output, "expressions(infix, postfix)\n");
+    match(PRG); match(EXP); match('('); match(INP); match(','); match(OUT); match(')'); match(';');
+    fprintf(output, "#include <iostream>\nusing namespace std;\n");
     match(BEGIN);
     fprintf(output, "begin\n");
     while (lookahead != END) {  
@@ -226,9 +227,10 @@ struct entry keywords[] = {
     "mod", MOD,
     "begin", BEGIN,
     "end", END,
-    "expressions", EXP,
-    "infix", INX,
-    "postfix", POX,
+    "PROGRAM", PRG,
+    "Example", EXP,
+    "Input", INP,
+    "Output", OUT,
     "times", TIM,
     "plus", PLS,
     "minus", MIN,
