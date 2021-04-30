@@ -118,8 +118,8 @@ void parse()
     lookahead = lexan();
     header();
     declarations();
-    match(BEGIN);
     fprintf(output, "begin\n");
+    match(BEGIN);
     while (lookahead != END) {  
         expr(); match(';'); fprintf(output, ";\n");
     }
@@ -141,6 +141,7 @@ void declarations()
     case VAR:
         match(VAR);
         variableDeclarations();
+        fprintf(output, "\n");
     default:
         return;
     }
