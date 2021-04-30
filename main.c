@@ -20,8 +20,14 @@
 #define MIN 267
 #define PLS 268
 #define EXP 269
+#define VAR 270
+#define ITG 272
+#define REL 273
+#define CHR 274
+#define BOL 275
 #define STRMAX 999
 #define SYMMAX 100
+#define variablesMax 20
 
 FILE *input;
 FILE *output;
@@ -33,6 +39,8 @@ int lookahead;
 char lexemes[STRMAX];
 int lastchar = -1;
 int lastentry = 0;
+int variables[variablesMax];
+int currentVariableCount = 0;
 
 
 struct entry {
@@ -45,6 +53,13 @@ struct entry symtable[SYMMAX];
 int lexan();
 void parse();
 void header();
+void declarations();
+void variableDeclarations();
+void variableDeclarationsPrime();
+void variableDeclaration();
+void identifierList();
+void identifierListPrime();
+void type();
 void expr();
 void term();
 void factor();
@@ -102,6 +117,7 @@ void parse()
 {
     lookahead = lexan();
     header();
+    declarations();
     match(BEGIN);
     fprintf(output, "begin\n");
     while (lookahead != END) {  
@@ -112,9 +128,106 @@ void parse()
     match(DONE);
 }
 
-void header() {
+void header()
+{
     match(PRG); match(EXP); match('('); match(INP); match(','); match(OUT); match(')'); match(';');
     fprintf(output, "#include <iostream>\nusing namespace std;\n");
+}
+
+void declarations()
+{
+    switch (lookahead)
+    {
+    case VAR:
+        match(VAR);
+        variableDeclarations();
+    default:
+        return;
+    }
+}
+
+void variableDeclarations()
+{
+    variableDeclaration();
+    variableDeclarationsPrime();
+}
+
+void variableDeclaration()
+{
+    currentVariableCount = 0;
+    identifierList();
+    match(':');
+    type();
+    match(';');
+    for (int i = 0; i < currentVariableCount; i++)
+    {
+        emit(ID, variables[i]);
+        if (i == currentVariableCount-1)
+            continue;
+        fprintf(output, ", ");
+    }
+    fprintf(output, "; ");
+}
+
+void identifierList()
+{
+    variables[currentVariableCount++] = tokenval;
+    match(ID);
+    identifierListPrime();
+}
+
+void identifierListPrime()
+{
+    switch (lookahead)
+    {
+    case ',':
+        match(',');
+        //emit(ID, tokenval);
+        variables[currentVariableCount++] = tokenval;
+        match(ID);
+        identifierListPrime();
+        break;
+    default:
+        return;
+    }
+}
+
+void variableDeclarationsPrime()
+{
+    switch (lookahead)
+    {
+    case ID:
+        variableDeclaration();
+        variableDeclarationsPrime();
+        break;
+    default:
+        return;
+    }   
+}
+
+void type()
+{
+    switch (lookahead)
+    {
+    case ITG:
+        fprintf(output, "int ");
+        match(ITG);
+        break;
+    case REL:
+        fprintf(output, "float ");
+        match(REL);
+        break;
+    case CHR:
+        fprintf(output, "char ");
+        match(CHR);
+        break;
+    case BOL:
+        fprintf(output, "bool ");
+        match(BOL);
+        break;
+    default:
+        error("Syntax error from type");
+    }
 }
 
 void expr()
@@ -168,6 +281,7 @@ void factor()
 void match(int t)
 {
     //std::cout << lookahead << " " << t << std::endl;
+    printf("%d\n", t);
     if (lookahead == t)
         lookahead = lexan();
     else error("Syntax Error from match");
@@ -192,7 +306,7 @@ void emit(int t, int tval)
         case NUM:
             fprintf(output, "%d ", tval); break;
         case ID:
-            fprintf(output, "%s ", symtable[tval].lexptr); break;
+            fprintf(output, "%s", symtable[tval].lexptr); break;
         default:
             fprintf(output, "Token %d, tokenval %d ", t, tval);
     }
@@ -238,6 +352,11 @@ struct entry keywords[] = {
     "times", TIM,
     "plus", PLS,
     "minus", MIN,
+    "VAR", VAR,
+    "integer", ITG,
+    "real", REL,
+    "char", CHR,
+    "boolean", BOL,
     0, 0
 };
 
