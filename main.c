@@ -44,6 +44,7 @@ struct entry symtable[SYMMAX];
 
 int lexan();
 void parse();
+void header();
 void expr();
 void term();
 void factor();
@@ -100,8 +101,7 @@ int lexan()     /* lexical analyzer */
 void parse()
 {
     lookahead = lexan();
-    match(PRG); match(EXP); match('('); match(INP); match(','); match(OUT); match(')'); match(';');
-    fprintf(output, "#include <iostream>\nusing namespace std;\n");
+    header();
     match(BEGIN);
     fprintf(output, "begin\n");
     while (lookahead != END) {  
@@ -112,6 +112,10 @@ void parse()
     match(DONE);
 }
 
+void header() {
+    match(PRG); match(EXP); match('('); match(INP); match(','); match(OUT); match(')'); match(';');
+    fprintf(output, "#include <iostream>\nusing namespace std;\n");
+}
 
 void expr()
 {
