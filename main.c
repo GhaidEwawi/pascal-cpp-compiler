@@ -33,7 +33,7 @@
 #define DWTO 280
 #define DO 281
 #define RELOP 282
-#define ADDOP 283
+#define OR 283
 #define NOT 284
 #define ELSE 286
 #define AND 287
@@ -367,9 +367,9 @@ void simpleExpression()
             term();
             simpleExpressionPrime();
             break;
-        case ADDOP:
-            match(ADDOP);
-            fprintf(output, " addop ");
+        case '+': case '-': case OR:
+            emit(lookahead, NONE);
+            match(lookahead);
             term();
             simpleExpressionPrime();
             break;
@@ -380,9 +380,9 @@ void simpleExpressionPrime()
 {
     switch (lookahead)
     {
-    case ADDOP:
-        match(ADDOP);
-        fprintf(output, " addop ");
+    case '+': case '-': case OR:
+        emit(lookahead, NONE);
+        match(lookahead);
         term();
         simpleExpressionPrime();
         break;
@@ -540,6 +540,8 @@ void emit(int t, int tval)
             fprintf(output, " minus "); break;
         case AND:
             fprintf(output, " & "); break;
+        case OR:
+            fprintf(output, " | "); break;
         case TIM:
             fprintf(output, " times "); break;
         case DIV:
@@ -607,7 +609,7 @@ struct entry keywords[] = {
     "DOWNTO", DWTO,
     "DO", DO,
     "relop", RELOP,
-    "addop", ADDOP,
+    "OR", OR,
     "not", NOT,
     "ELSE", ELSE,
     "AND", AND,
