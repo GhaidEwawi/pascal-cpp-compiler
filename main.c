@@ -86,9 +86,6 @@ void elseClause();
 void term();
 void termPrime();
 void factor();
-void expr();
-void termm();
-void factorr();
 void match(int);
 void emit(int, int);
 int lookup(char[]);
@@ -101,7 +98,6 @@ int lexan()     /* lexical analyzer */
     int t;
     while (1) {
         t = getc(input);
-        //printf("%c", t);
         if (t == ' ' || t == '\t')
             ;
         else if (t == '\n')
@@ -158,6 +154,7 @@ int lexan()     /* lexical analyzer */
     }
 }
 
+
 void parse()
 {
     lookahead = lexan();
@@ -168,19 +165,15 @@ void parse()
     fprintf(output, "REACHED THE END");
     match(DONE);
     exit(0);
-    match(BEGIN);
-    while (lookahead != END) {  
-        expr(); match(';'); fprintf(output, ";\n");
-    }
-    match(END); match('.');
-    fprintf(output, "end.");
 }
+
 
 void header()
 {
     match(PRG); match(EXP); match('('); match(INP); match(','); match(OUT); match(')'); match(';');
     fprintf(output, "#include <iostream>\nusing namespace std;\n");
 }
+
 
 void declarations()
 {
@@ -195,11 +188,13 @@ void declarations()
     }
 }
 
+
 void variableDeclarations()
 {
     variableDeclaration();
     variableDeclarationsPrime();
 }
+
 
 void variableDeclaration()
 {
@@ -218,12 +213,14 @@ void variableDeclaration()
     fprintf(output, "; ");
 }
 
+
 void identifierList()
 {
     variables[currentVariableCount++] = tokenval;
     match(ID);
     identifierListPrime();
 }
+
 
 void identifierListPrime()
 {
@@ -240,6 +237,7 @@ void identifierListPrime()
     }
 }
 
+
 void variableDeclarationsPrime()
 {
     switch (lookahead)
@@ -252,6 +250,7 @@ void variableDeclarationsPrime()
         return;
     }   
 }
+
 
 void type()
 {
@@ -278,6 +277,7 @@ void type()
     }
 }
 
+
 void block()
 {
     fprintf(output, "void main(void)\n");
@@ -288,11 +288,13 @@ void block()
     fprintf(output, "}");
 }
 
+
 void statements()
 {
     statement();
     statementsPrime();
 }
+
 
 void statement()
 {
@@ -361,11 +363,13 @@ void statement()
     }
 }
 
+
 void expression()
 {
     simpleExpression();
     expressionPrime();
 }
+
 
 void expressionPrime()
 {
@@ -380,6 +384,7 @@ void expressionPrime()
         return;
     }
 }
+
 
 void simpleExpression()
 {
@@ -398,6 +403,7 @@ void simpleExpression()
     }
 }
 
+
 void simpleExpressionPrime()
 {
     switch (lookahead)
@@ -413,11 +419,13 @@ void simpleExpressionPrime()
     }
 }
 
+
 void term()
 {
     factor();
     termPrime();
 }
+
 
 void factor()
 {
@@ -448,6 +456,7 @@ void factor()
     }
 }
 
+
 void termPrime()    
 {
     switch (lookahead)
@@ -462,6 +471,7 @@ void termPrime()
         return;
     }
 }
+
 
 void statementsPrime()
 {
@@ -478,6 +488,7 @@ void statementsPrime()
 
 }
 
+
 void elseClause()
 {
     switch (lookahead)
@@ -489,52 +500,6 @@ void elseClause()
         break;
     default:
         return;
-    }
-}
-
-void expr()
-{
-    int t;
-    termm();
-    while (1)
-        switch (lookahead)
-        {
-        case '+': case '-': case PLS: case MIN:
-            t = lookahead;
-            match(lookahead); termm(); emit(t, NONE);
-            continue;
-        
-        default:
-            return;
-        }
-}
-
-void termm()
-{
-    int t;
-    factorr();
-    while (1)
-        switch(lookahead) {
-            case '*': case '/': case DIV: case MOD: case TIM:
-                t = lookahead;
-                match(lookahead); factorr(); emit(t, NONE);
-                continue;
-            default:
-                return;
-        }
-}
-
-void factorr()
-{
-    switch (lookahead) {
-        case '(':
-            match('('); expr(); match(')'); break;
-        case NUM:
-            emit(NUM, tokenval); match(NUM); break;
-        case ID:
-            emit(ID, tokenval); match(ID); break;
-        default:
-            error("Syntax Error from factorr");
     }
 }
 
@@ -612,7 +577,6 @@ int insert(char s[], int tok)
     return lastentry;
 }
 
-
 struct entry keywords[] = {
     "div", DIV,
     "mod", MOD,
@@ -646,6 +610,7 @@ struct entry keywords[] = {
     0, 0
 };
 
+
 void init()
 {
     struct entry *p;
@@ -653,12 +618,14 @@ void init()
         insert(p->lexptr, p->token);
 }
 
+
 void error(char* m)
 {
     
     printf("Error: line %d: %s \n", lineno, m);
     exit(1);
 }
+
 
 void openInputFile(char* fileName)
 {
@@ -670,10 +637,12 @@ void openInputFile(char* fileName)
     }
 }
 
+
 void openOutputFile(char* fileName)
 {
     output = fopen(fileName, "w");
 }
+
 
 int main(int argc, char **argv)
 {
