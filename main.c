@@ -60,6 +60,8 @@ struct entry {
 struct entry symtable[SYMMAX];
 
 int lexan();
+int lookup(char[]);
+int insert(char[], int);
 void parse();
 void header();
 void declarations();
@@ -83,10 +85,8 @@ void termPrime();
 void factor();
 void match(int);
 void emit(int, int);
-int lookup(char[]);
 void init();
 void error(char*);
-int insert(char[], int);
 
 int lexan()     /* lexical analyzer */
 {
