@@ -2,6 +2,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #define BSIZE 128   /* buffer size */
 #define NONE -1
@@ -25,6 +26,17 @@
 #define REL 273
 #define CHR 274
 #define BOL 275
+#define IF 276
+#define THN 277
+#define FOR 278
+#define TO 279
+#define DWTO 280
+#define DO 281
+#define RELOP 282
+#define ADDOP 283
+#define NOT 284
+#define MULOP 285
+#define ELSE 286
 #define STRMAX 999
 #define SYMMAX 100
 #define variablesMax 20
@@ -60,9 +72,21 @@ void variableDeclaration();
 void identifierList();
 void identifierListPrime();
 void type();
-void expr();
+void block();
+void statements();
+void statement();
+void statementsPrime();
+void expression();
+void expressionPrime();
+void simpleExpression();
+void simpleExpressionPrime();
+void elseClause();
 void term();
+void termPrime();
 void factor();
+void expr();
+void termm();
+void factorr();
 void match(int);
 void emit(int, int);
 int lookup(char[]);
@@ -118,7 +142,10 @@ void parse()
     lookahead = lexan();
     header();
     declarations();
-    fprintf(output, "begin\n");
+    block();
+
+    fprintf(output, "REACHED THE END");
+    exit(0);
     match(BEGIN);
     while (lookahead != END) {  
         expr(); match(';'); fprintf(output, ";\n");
@@ -231,16 +258,230 @@ void type()
     }
 }
 
+void block()
+{
+    fprintf(output, "void main(void)\n");
+    match('{');
+    fprintf(output, "{\n");
+    statements();
+    match('}');
+    fprintf(output, "}");
+}
+
+void statements()
+{
+    statement();
+    statementsPrime();
+}
+
+void statement()
+{
+    int t = tokenval;
+    int var;
+    bool to = true;
+    switch (lookahead)
+    {
+    case ID:
+        match(ID); match(':'); match('=');
+        emit(ID, t); fprintf(output, " = ");
+        expression();
+        fprintf(output, ";\n");
+        break;
+    case '{':
+        block();
+        break;
+    case IF:
+        match(IF);
+        fprintf(output, "if ( ");
+        expression();
+        fprintf(output, " )");
+        match(THN);
+        fprintf(output, "\n\t");
+        statement();
+        elseClause();
+        break;
+    case FOR:
+        match(FOR);
+        fprintf(output, "for ( int ");
+        var = tokenval;
+        emit(ID, tokenval); fprintf(output, " = ");
+        match(ID);
+        match(':');
+        match('=');
+        emit(NUM, tokenval); fprintf(output, "; ");
+        match(NUM);
+        switch (lookahead)
+        {
+        case TO:
+            match(TO);
+            break;
+        case DWTO:
+            match(DWTO);
+            to = false;
+            break;
+        default:
+            error("Error from statement");
+        }
+        if (to) {
+            emit(ID, var); fprintf(output, " < ");
+            emit(NUM, tokenval);
+            fprintf(output, "; "); emit(ID, var); fprintf(output, "++");
+        } else {
+            emit(ID, var); fprintf(output, " > ");
+            emit(NUM, tokenval);
+            fprintf(output, "; "); emit(ID, var); fprintf(output, "--");
+        }
+        match(NUM);
+        fprintf(output, " )\n\t");
+        match(DO);
+        statement();
+        break;
+    default:
+        return;
+    }
+}
+
+void expression()
+{
+    simpleExpression();
+    expressionPrime();
+}
+
+void expressionPrime()
+{
+    switch (lookahead)
+    {
+    case RELOP:
+        match(RELOP);
+        fprintf(output, " relop ");
+        simpleExpression();
+        break;
+    default:
+        return;
+    }
+}
+
+void simpleExpression()
+{
+    switch(lookahead)
+    {
+        case ID: case NUM: case '(': case NOT:
+            term();
+            simpleExpressionPrime();
+            break;
+        case ADDOP:
+            match(ADDOP);
+            fprintf(output, " addop ");
+            term();
+            simpleExpressionPrime();
+            break;
+    }
+}
+
+void simpleExpressionPrime()
+{
+    switch (lookahead)
+    {
+    case ADDOP:
+        match(ADDOP);
+        fprintf(output, " addop ");
+        term();
+        simpleExpressionPrime();
+        break;
+    default:
+        return;
+    }
+}
+
+void term()
+{
+    factor();
+    termPrime();
+}
+
+void factor()
+{
+    switch (lookahead)
+    {
+    case ID:
+        emit(ID, tokenval);
+        match(ID);
+        break;
+    case NUM:
+        emit(NUM, tokenval);
+        match(NUM);
+        break;
+    case '(':
+        match('(');
+        fprintf(output, "(");
+        expression();
+        match(')');
+        fprintf(output, ")");
+        break;
+    case NOT:
+        match(NOT);
+        fprintf(output, "!");
+        factor();
+        break;
+    default:
+        error("Error from factor");
+    }
+}
+
+void termPrime()
+{
+    switch (lookahead)
+    {
+    case MULOP:
+        match(MULOP);
+        fprintf(output, " mulop ");
+        factor();
+        termPrime();
+        break;
+    default:
+        return;
+    }
+}
+
+void statementsPrime()
+{
+    switch (lookahead)
+    {
+    case ';':
+        match(';');
+        statement();
+        statementsPrime();
+        break;
+    default:
+        return;
+    }
+
+}
+
+void elseClause()
+{
+    switch (lookahead)
+    {
+    case ELSE:
+        match(ELSE);
+        fprintf(output, "else\n\t");
+        statement();
+        break;
+    default:
+        return;
+    }
+}
+
 void expr()
 {
     int t;
-    term();
+    termm();
     while (1)
         switch (lookahead)
         {
         case '+': case '-': case PLS: case MIN:
             t = lookahead;
-            match(lookahead); term(); emit(t, NONE);
+            match(lookahead); termm(); emit(t, NONE);
             continue;
         
         default:
@@ -248,23 +489,22 @@ void expr()
         }
 }
 
-
-void term()
+void termm()
 {
     int t;
-    factor();
+    factorr();
     while (1)
         switch(lookahead) {
             case '*': case '/': case DIV: case MOD: case TIM:
                 t = lookahead;
-                match(lookahead); factor(); emit(t, NONE);
+                match(lookahead); factorr(); emit(t, NONE);
                 continue;
             default:
                 return;
         }
 }
 
-void factor()
+void factorr()
 {
     switch (lookahead) {
         case '(':
@@ -274,7 +514,7 @@ void factor()
         case ID:
             emit(ID, tokenval); match(ID); break;
         default:
-            error("Syntax Error from factor");
+            error("Syntax Error from factorr");
     }
 }
 
@@ -282,10 +522,12 @@ void factor()
 void match(int t)
 {
     //std::cout << lookahead << " " << t << std::endl;
-    printf("%d\n", t);
     if (lookahead == t)
         lookahead = lexan();
-    else error("Syntax Error from match");
+    else {
+        printf("%c\n", t);
+        error("Syntax Error from match");
+    }
 }
 
 
@@ -293,7 +535,7 @@ void emit(int t, int tval)
 {
     switch(t) {
         case '+': case '-': case '*': case '/':
-            fprintf(output, "%c ", t); break;
+            fprintf(output, "%c", t); break;
         case PLS:
             fprintf(output, "plus "); break;
         case MIN:
@@ -305,7 +547,7 @@ void emit(int t, int tval)
         case MOD:
             fprintf(output, "MOD "); break;
         case NUM:
-            fprintf(output, "%d ", tval); break;
+            fprintf(output, "%d", tval); break;
         case ID:
             fprintf(output, "%s", symtable[tval].lexptr); break;
         default:
@@ -358,6 +600,17 @@ struct entry keywords[] = {
     "real", REL,
     "char", CHR,
     "boolean", BOL,
+    "IF", IF,
+    "THEN", THN,
+    "FOR", FOR,
+    "TO", TO,
+    "DOWNTO", DWTO,
+    "DO", DO,
+    "relop", RELOP,
+    "addop", ADDOP,
+    "not", NOT,
+    "mulop", MULOP,
+    "ELSE", ELSE,
     0, 0
 };
 
