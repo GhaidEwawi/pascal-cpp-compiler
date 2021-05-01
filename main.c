@@ -32,11 +32,13 @@
 #define TO 279
 #define DWTO 280
 #define DO 281
-#define RELOP 282
 #define OR 283
 #define NOT 284
 #define ELSE 286
 #define AND 287
+#define GE 288
+#define LE 289
+#define NOTE 290
 #define STRMAX 999
 #define SYMMAX 100
 #define variablesMax 20
@@ -108,6 +110,26 @@ int lexan()     /* lexical analyzer */
             ungetc(t, input);
             fscanf(input, "%d", &tokenval);
             return NUM;
+        }
+        else if (t == '<') {
+            int temp = getc(input);
+            if (temp == '=')
+                return LE;
+            else if (temp == '>')
+                return NOTE;
+            else {
+                ungetc(t, input);
+                return t;
+            }
+        }
+        else if (t == '>') {
+            int temp = getc(input);
+            if (temp == '=')
+                return GE;
+            else {
+                ungetc(t, input);
+                return t;
+            }
         }
         else if (isalpha(t)) {
             int p, b = 0;
@@ -349,9 +371,9 @@ void expressionPrime()
 {
     switch (lookahead)
     {
-    case RELOP:
-        match(RELOP);
-        fprintf(output, " relop ");
+    case '=': case '>': case '<': case GE: case LE: case NOTE:
+        emit(lookahead, NONE);
+        match(lookahead);
         simpleExpression();
         break;
     default:
@@ -532,7 +554,7 @@ void match(int t)
 void emit(int t, int tval)
 {
     switch(t) {
-        case '+': case '-': case '*': case '/':
+        case '+': case '-': case '*': case '/': case '<': case '>': case '=':
             fprintf(output, " %c ", t); break;
         case PLS:
             fprintf(output, " plus "); break;
@@ -542,6 +564,12 @@ void emit(int t, int tval)
             fprintf(output, " & "); break;
         case OR:
             fprintf(output, " | "); break;
+        case GE:
+            fprintf(output, " >= "); break;
+        case LE:
+            fprintf(output, " <= "); break;
+        case NOTE:
+            fprintf(output, " != "); break;
         case TIM:
             fprintf(output, " times "); break;
         case DIV:
@@ -608,7 +636,9 @@ struct entry keywords[] = {
     "TO", TO,
     "DOWNTO", DWTO,
     "DO", DO,
-    "relop", RELOP,
+    ">=", GE,
+    "<=", LE,
+    "<>", NOTE,
     "OR", OR,
     "not", NOT,
     "ELSE", ELSE,
