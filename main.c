@@ -98,9 +98,49 @@ int lexan()     /* lexical analyzer */
         else if (t == '\n')
             lineno = lineno + 1;
         else if (isdigit(t)) {
+            int p, b = 0;
             ungetc(t, input);
             fscanf(input, "%d", &tokenval);
-            return NUM;
+            if ( t == '.' ) {
+                b += sprintf(lexbuf + b, "%d", tokenval);
+                t = getc(input);
+                b += sprintf(lexbuf + b, ".");
+                t = getc(input);
+                if (isdigit(t)) {
+                    ungetc(t, input);
+                    fscanf(input, "%d", &tokenval);
+                    b += sprintf(lexbuf + b, "%d", tokenval);
+                    t = getc(input);  
+                }
+
+                printf("token t is %c\n", t);
+                if (t == 'E' || t == 'e') {
+                    b += sprintf(lexbuf + b, "%c", t);
+                    t = getc(input);
+                    if (t == '+' || t == '-') {
+                    b += sprintf(lexbuf + b, "%c", t);
+                    } else {
+                    error("Wrong number format");
+                    }
+                    t = getc(input);
+                    if (isdigit(t)) {
+                        ungetc(t, input);
+                        fscanf(input, "%d", &tokenval);
+                        b += sprintf(lexbuf + b, "%d", tokenval);
+                    }
+                } else {
+                ungetc(t, input);
+                }
+        
+                p = lookup(lexbuf);
+                if (p == 0)
+                    p = insert(lexbuf, ID);
+                tokenval = p;
+                printf("%s\n", lexbuf);
+                return symtable[p].token;
+            } else {
+                return NUM;
+            }
         }
         else if (t == '<') {
             int temp = getc(input);
