@@ -44,6 +44,8 @@ FILE *output;
 int tokenval = NONE;   /* value of token attribute */
 int lineno = 1;
 char lexbuf[BSIZE];
+char temp1[BSIZE];
+char temp2[BSIZE];
 int lookahead;
 char lexemes[STRMAX];
 int lastchar = -1;
@@ -581,9 +583,14 @@ void emit(int t, int tval)
 int lookup(char s[])
 {
     int p;
-    for (p = lastentry; p > 0; p--)
-        if (strcmp(symtable[p].lexptr, s) == 0)
+    strcpy(temp1, s);
+    strlwr(temp1);
+    for (p = lastentry; p > 0; p--) {
+        strcpy(temp2, symtable[p].lexptr);
+        strlwr(temp2);
+        if (strcmp(temp1, temp2) == 0)
             return p;
+    }
     return 0;
 }
 
