@@ -35,8 +35,8 @@
 #define RELOP 282
 #define ADDOP 283
 #define NOT 284
-#define MULOP 285
 #define ELSE 286
+#define AND 287
 #define STRMAX 999
 #define SYMMAX 100
 #define variablesMax 20
@@ -135,7 +135,6 @@ int lexan()     /* lexical analyzer */
         }
     }
 }
-
 
 void parse()
 {
@@ -431,9 +430,9 @@ void termPrime()
 {
     switch (lookahead)
     {
-    case MULOP:
-        match(MULOP);
-        fprintf(output, " mulop ");
+    case '*': case '/': case DIV: case MOD: case AND:
+        emit(lookahead, NONE);
+        match(lookahead);
         factor();
         termPrime();
         break;
@@ -534,17 +533,19 @@ void emit(int t, int tval)
 {
     switch(t) {
         case '+': case '-': case '*': case '/':
-            fprintf(output, "%c", t); break;
+            fprintf(output, " %c ", t); break;
         case PLS:
-            fprintf(output, "plus "); break;
+            fprintf(output, " plus "); break;
         case MIN:
-            fprintf(output, "minus "); break;
+            fprintf(output, " minus "); break;
+        case AND:
+            fprintf(output, " & "); break;
         case TIM:
-            fprintf(output, "times "); break;
+            fprintf(output, " times "); break;
         case DIV:
-            fprintf(output, "DIV "); break;
+            fprintf(output, " DIV "); break;
         case MOD:
-            fprintf(output, "MOD "); break;
+            fprintf(output, " MOD "); break;
         case NUM:
             fprintf(output, "%d", tval); break;
         case ID:
@@ -608,8 +609,8 @@ struct entry keywords[] = {
     "relop", RELOP,
     "addop", ADDOP,
     "not", NOT,
-    "mulop", MULOP,
     "ELSE", ELSE,
+    "AND", AND,
     0, 0
 };
 
