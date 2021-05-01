@@ -150,7 +150,7 @@ int lexan()     /* lexical analyzer */
             else if (temp == '>')
                 return NOTE;
             else {
-                ungetc(t, input);
+                ungetc(temp, input);
                 return t;
             }
         }
@@ -159,7 +159,7 @@ int lexan()     /* lexical analyzer */
             if (temp == '=')
                 return GE;
             else {
-                ungetc(t, input);
+                ungetc(temp, input);
                 return t;
             }
         }
