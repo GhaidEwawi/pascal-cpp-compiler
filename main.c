@@ -12,14 +12,9 @@
 #define MOD 258
 #define ID 259
 #define DONE 260
-#define BEGIN 261
-#define END 262
 #define PRG 263
 #define INP 264
 #define OUT 265
-#define TIM 266
-#define MIN 267
-#define PLS 268
 #define EXP 269
 #define VAR 270
 #define ITG 272
@@ -161,10 +156,7 @@ void parse()
     header();
     declarations();
     block();
-
-    fprintf(output, "REACHED THE END");
     match(DONE);
-    exit(0);
 }
 
 
@@ -521,10 +513,6 @@ void emit(int t, int tval)
     switch(t) {
         case '+': case '-': case '*': case '/': case '<': case '>': case '=':
             fprintf(output, " %c ", t); break;
-        case PLS:
-            fprintf(output, " plus "); break;
-        case MIN:
-            fprintf(output, " minus "); break;
         case AND:
             fprintf(output, " & "); break;
         case OR:
@@ -535,8 +523,6 @@ void emit(int t, int tval)
             fprintf(output, " <= "); break;
         case NOTE:
             fprintf(output, " != "); break;
-        case TIM:
-            fprintf(output, " times "); break;
         case DIV:
             fprintf(output, " DIV "); break;
         case MOD:
@@ -580,15 +566,10 @@ int insert(char s[], int tok)
 struct entry keywords[] = {
     "div", DIV,
     "mod", MOD,
-    "begin", BEGIN,
-    "end", END,
     "PROGRAM", PRG,
     "Example", EXP,
     "Input", INP,
     "Output", OUT,
-    "times", TIM,
-    "plus", PLS,
-    "minus", MIN,
     "VAR", VAR,
     "integer", ITG,
     "real", REL,
