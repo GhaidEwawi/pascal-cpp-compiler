@@ -145,6 +145,7 @@ void parse()
     block();
 
     fprintf(output, "REACHED THE END");
+    match(DONE);
     exit(0);
     match(BEGIN);
     while (lookahead != END) {  
@@ -152,7 +153,6 @@ void parse()
     }
     match(END); match('.');
     fprintf(output, "end.");
-    match(DONE);
 }
 
 void header()
@@ -210,7 +210,6 @@ void identifierListPrime()
     {
     case ',':
         match(',');
-        //emit(ID, tokenval);
         variables[currentVariableCount++] = tokenval;
         match(ID);
         identifierListPrime();
@@ -428,7 +427,7 @@ void factor()
     }
 }
 
-void termPrime()
+void termPrime()    
 {
     switch (lookahead)
     {
