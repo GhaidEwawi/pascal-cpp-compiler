@@ -198,6 +198,7 @@ void parse()
     lookahead = lexan();
     header();
     declarations();
+    fprintf(output, "void main(void)\n");
     block();
     match(DONE);
 }
@@ -315,12 +316,11 @@ void type()
 
 void block()
 {
-    fprintf(output, "void main(void)\n");
     match('{');
     fprintf(output, "{\n");
     statements();
     match('}');
-    fprintf(output, "}");
+    fprintf(output, "}\n");
 }
 
 
