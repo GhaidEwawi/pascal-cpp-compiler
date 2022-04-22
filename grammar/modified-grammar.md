@@ -37,8 +37,9 @@ ElseClause  ->  **else** Statement
 ExpressionList  -> Expression ExpressionList'
 ExpressionList' -> **,** Expression ExpressionList' | **$\varepsilon$**
 
-Expression  ->  SimpleExpression **relop** SimpleExpression
-                | SimpleExpression
+Expression  ->  SimpleExpression Expression'
+Expression' -> **relop** SimpleExpression
+                | **<epsilon>**
 
 SimpleExpression    -> Term SimpleExpression' 
                         | **addop** Term SimpleExpression'
